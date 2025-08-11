@@ -1,0 +1,30 @@
+name: criteo-mko-release
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    name: Publish artifacts
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Setup go
+      uses: actions/setup-go@v5
+      with:
+        # read go version from go.mod file
+        go-version-file: 'go.mod'
+    - name: Build
+      run: make docker-prepare
+    - name: Prepare publish
+      run: |
+        mkdir publish
+        mv out publish/build-${GITHUB_REF#refs/*/}
+    - name: Upload
+      uses: fnkr/github-action-ghr@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GHR_PATH: ./publish
+        GHR_COMPRESS: gz
