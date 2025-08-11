@@ -401,6 +401,12 @@ func (r *MilvusStatusSyncer) GetMsgStreamCondition(
 		// rocksmq / natsmq is built in, assume ok
 		return msgStreamReadyCondition, nil
 	case v1beta1.MsgStreamTypeKafka:
+		// criteo: do not check external kafka
+		// no need to provision _milvus-operator topic (see pkg/external/kafka.go:105)
+		if mc.Spec.Dep.Kafka.External {
+			return msgStreamReadyCondition, nil
+		}
+
 		kafkaConf, err := GetKafkaConfFromCR(mc)
 		if err != nil {
 			return v1beta1.MilvusCondition{
