@@ -5,6 +5,7 @@ metadata:
   name: {{ include "chart.fullname" . | quote }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels: {{- include "chart.selectorLabels" . | nindent 6 }}
   template:
@@ -22,6 +23,7 @@ spec:
         - --health-probe-bind-address=:8081
         - --metrics-bind-address=:8080
         - --leader-elect
+        - -watch-namespace={{ .Release.Namespace }}
         {{- if .Values.enableWebhook }}
         - --webhook=true
         {{- end }}

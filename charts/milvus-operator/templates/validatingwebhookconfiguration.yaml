@@ -5,7 +5,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{. | include "chart.fullname"}}-serving-cert'
-  name: '{{ include "chart.fullname" . }}-validating-webhook-configuration'
+  name: '{{ include "chart.fullname" . }}-validating-webhook-configuration-{{ .Release.Namespace }}'
 webhooks:
 - admissionReviewVersions:
   - v1
