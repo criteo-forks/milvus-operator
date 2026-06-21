@@ -13,6 +13,13 @@ import (
 	"github.com/zilliztech/milvus-operator/pkg/helm/values"
 )
 
+// defaultMaxHistory bounds the number of Helm release revisions retained per
+// release. The Helm SDK defaults action.Upgrade.MaxHistory to 0 (unlimited),
+// unlike the helm CLI which defaults to 10. Leaving it unset causes one release
+// secret to accumulate per upgrade with no pruning, which can bloat the
+// namespace.
+const defaultMaxHistory = 10
+
 type ChartRequest struct {
 	ReleaseName string
 	Namespace   string
@@ -79,6 +86,8 @@ func (d *LocalClient) Upgrade(cfg *action.Configuration, request ChartRequest) e
 func (d *LocalClient) Update(cfg *action.Configuration, request ChartRequest) error {
 	client := action.NewUpgrade(cfg)
 	client.Namespace = request.Namespace
+	// Bound retained revisions; the SDK default (0) keeps unlimited history.
+	client.MaxHistory = defaultMaxHistory
 	chartRequested, err := loader.Load(request.Chart)
 	if err != nil {
 		return err
